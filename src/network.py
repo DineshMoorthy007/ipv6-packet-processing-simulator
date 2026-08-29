@@ -1,116 +1,15 @@
 """
-Simulated IPv6 Network Topology Module - IPv6 Packet Processing Simulator (Phase 3)
+Simulated IPv6 Network Topology Module - IPv6 Packet Processing Simulator (Phase 3 & 6)
 
-This module defines `Host`, `Link`, and `NetworkTopology` to model devices,
-interconnections, and sample multi-hop topologies.
+This module defines `NetworkTopology` to manage devices, links, and sample
+multi-hop topologies.
 """
 
 from __future__ import annotations
 
-import ipaddress
 from typing import Any, Dict, List, Optional
-from src.ipv6_address import analyze_ipv6
+from src.host import Host, Link
 from src.router import Router
-
-
-class Host:
-    """
-    Representation of an end-host in the simulated IPv6 network.
-
-    Attributes
-    ----------
-    name : str
-        Host identifier (e.g. 'Host A').
-    ipv6_address : str
-        Assigned IPv6 address.
-    prefix_length : int
-        Subnet prefix length.
-    network : str
-        Connected subnet CIDR.
-    default_gateway : str
-        Default router gateway IPv6 address.
-    interface : str
-        Local network interface name (e.g. 'eth0').
-    """
-
-    def __init__(
-        self,
-        name: str,
-        ipv6_address_cidr: str,
-        default_gateway: Optional[str] = None,
-        interface: str = "eth0",
-    ):
-        self.name: str = name.strip()
-        cleaned_cidr = ipv6_address_cidr.strip()
-        if "/" not in cleaned_cidr:
-            cleaned_cidr = f"{cleaned_cidr}/64"
-
-        intf_obj = ipaddress.IPv6Interface(cleaned_cidr)
-        self.ipv6_address: str = intf_obj.ip.compressed
-        self.network: str = intf_obj.network.compressed
-        self.prefix_length: int = intf_obj.network.prefixlen
-        self.interface: str = interface.strip()
-
-        if default_gateway:
-            gw_res = analyze_ipv6(default_gateway.strip())
-            self.default_gateway: Optional[str] = gw_res.compressed or default_gateway.strip()
-        else:
-            self.default_gateway = None
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert host configuration to dictionary."""
-        return {
-            "name": self.name,
-            "ipv6_address": f"{self.ipv6_address}/{self.prefix_length}",
-            "network": self.network,
-            "default_gateway": self.default_gateway,
-            "interface": self.interface,
-        }
-
-    def __repr__(self) -> str:
-        return f"Host(name='{self.name}', ip='{self.ipv6_address}/{self.prefix_length}', gw='{self.default_gateway}')"
-
-
-class Link:
-    """
-    Representation of a point-to-point or broadcast link between two network nodes.
-
-    Attributes
-    ----------
-    node_a : str
-        Name of first node.
-    interface_a : str
-        Interface name on node A.
-    node_b : str
-        Name of second node.
-    interface_b : str
-        Interface name on node B.
-    network : str
-        Subnet prefix for the link.
-    """
-
-    def __init__(self, node_a: str, interface_a: str, node_b: str, interface_b: str, network: str):
-        self.node_a: str = node_a.strip()
-        self.interface_a: str = interface_a.strip()
-        self.node_b: str = node_b.strip()
-        self.interface_b: str = interface_b.strip()
-        self.network: str = ipaddress.IPv6Network(network.strip(), strict=False).compressed
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert link configuration to dictionary."""
-        return {
-            "node_a": self.node_a,
-            "interface_a": self.interface_a,
-            "node_b": self.node_b,
-            "interface_b": self.interface_b,
-            "network": self.network,
-        }
-
-    def __repr__(self) -> str:
-        return (
-            f"Link({self.node_a}:{self.interface_a} <--> {self.node_b}:{self.interface_b} "
-            f"on {self.network})"
-        )
 
 
 class NetworkTopology:

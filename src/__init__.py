@@ -6,6 +6,7 @@ Phase 2: IPv6 Packet & Header Simulation.
 Phase 3: Simulated Routers & IPv6 Routing Tables.
 Phase 4: IPv6 Packet Forwarding Simulation.
 Phase 5: Interactive Network Visualization & Simulation Dashboard.
+Phase 6: Final Integration & Polish.
 """
 
 from src.ipv6_address import (
@@ -27,9 +28,11 @@ from src.router import (
     Router,
     RouterInterface,
 )
-from src.network import (
+from src.host import (
     Host,
     Link,
+)
+from src.network import (
     NetworkTopology,
     build_sample_topology,
 )

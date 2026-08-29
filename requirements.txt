@@ -1,5 +1,5 @@
-# IPv6 Packet Processing Simulator - Phase 1 Requirements
-# Note: Core IPv6 address analysis uses Python's built-in `ipaddress` module (no external runtime dependencies required).
+# IPv6 Packet Processing Simulator - Requirements
+# Core network and address analysis relies strictly on Python's built-in `ipaddress` library.
 
 # Testing Framework
 pytest>=8.0.0
