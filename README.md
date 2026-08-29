@@ -1,6 +1,6 @@
 # IPv6 Packet Processing Simulator
 
-An educational and modular network simulator designed to demonstrate IPv6 address mechanics, packet header structures, routing tables, Longest Prefix Match (LPM), and hop-by-hop packet forwarding.
+An educational and modular network simulator designed to demonstrate IPv6 address mechanics, packet header structures, routing tables, Longest Prefix Match (LPM), hop-by-hop packet forwarding, and interactive visual dashboards.
 
 ---
 
@@ -10,18 +10,18 @@ An educational and modular network simulator designed to demonstrate IPv6 addres
 - **Phase 2 (Completed)**: IPv6 Packet & Fixed 40-Byte Header Simulation
 - **Phase 3 (Completed)**: Simulated Routers, Interfaces, Routing Tables & Longest Prefix Match (LPM)
 - **Phase 4 (Completed)**: End-to-End Hop-by-Hop Packet Forwarding Engine & Routing Simulation
-- **Phase 5 (Upcoming)**: Interactive Streamlit Web UI & Real-Time Graph Animation
+- **Phase 5 (Completed)**: Interactive Network Visualization, Device Inspectors & Simulation Dashboard
 
 ---
 
 ## Technologies Used
 - **Language**: Python 3.10+
-- **Standard Library**: `ipaddress` (built-in module for robust IPv6 parsing, subnetting, and route calculations)
+- **Standard Library**: `ipaddress` (built-in module for robust IPv6 parsing, subnet calculations, and routing)
 - **Testing**: `pytest`
 
 ---
 
-## Simulated Network Topology
+## Simulated Network Architecture
 
 ```text
   [Host A] (2001:db8:1::10/64)  -- Gateway: 2001:db8:1::1
@@ -57,13 +57,13 @@ An educational and modular network simulator designed to demonstrate IPv6 addres
 ## Features
 
 ### Phase 1: IPv6 Addressing Engine
-- Address validation, RFC 5952 compression, 8-group expansion, 128-bit confirmation, integer, hex, and binary representation.
-- Address classification (Global Unicast, Link-Local, Unique-Local, Loopback, Unspecified, Multicast with scope detection, Documentation).
-- Prefix and subnet calculation (network address, netmask, hostmask, interface ID, subnet capacity).
+- Address validation, RFC 5952 compression, 8-group expansion, 128-bit confirmation, integer, hex, and binary representations.
+- Scope and type classification (Global Unicast, Link-Local, Unique-Local Private, Loopback, Unspecified, Multicast with scope detection, Documentation).
+- Prefix and subnet breakdown (network address, netmask, hostmask, 64-bit Interface ID, subnet host capacity).
 
 ### Phase 2: IPv6 Packet & Header Simulation
 - Fixed 40-byte base header modeling: Version (`6`), Traffic Class (`0-255`), Flow Label (`0-1048575`), byte-accurate Payload Length, Next Header (`UDP`, `TCP`, `ICMPv6`, `No Next Header`), and Hop Limit (`0-255`).
-- Textual packet display (`display_header()`) and summary serialization.
+- Visual header inspector (`format_header_view()`) and summary serialization.
 
 ### Phase 3: Simulated Routers & Routing Tables
 - `RoutingTable` engine with Connected and Static routes.
@@ -80,7 +80,15 @@ An educational and modular network simulator designed to demonstrate IPv6 addres
   5. **Route Lookup**: Performs Longest Prefix Match (LPM) on current router's routing table.
   6. **Next Hop Resolution**: Resolves next router interface and continues traversal until destination is reached.
 - **Forwarding Event Log**: Maintains a step-by-step sequential audit log of every routing decision and Hop Limit mutation.
-- **Preservation of Packet Integrity**: All other packet fields (Version, Traffic Class, Flow Label, Payload Length, Next Header, Source Address, Destination Address, Payload) remain completely intact throughout transmission.
+- **Preservation of Packet Integrity**: All other packet fields remain intact throughout transmission.
+
+### Phase 5: Visualization & Simulation Dashboard
+- **Topology Visualization**: Visual diagram with dynamic path highlighting (`[* Host A *] -> [* R1 *] -> ...`).
+- **Device Inspector Cards**: Comprehensive specifications for Hosts and Routers.
+- **Step-by-Step Packet Movement Snapshots**: Visual hop-by-hop progression display.
+- **Processing Timeline**: Vertical workflow timeline (`[OK]` steps, `[X]` drop indicators).
+- **Forwarding Statistics**: Summary table of hop counts, status, and transit metrics.
+- **Clean Architecture for Streamlit Integration**: Core logic is fully decoupled from the terminal interface.
 
 ---
 
@@ -96,16 +104,18 @@ ipv6-packet-processing-simulator/
 │   ├── routing_table.py       # RoutingTable with LPM lookup (Phase 3)
 │   ├── router.py              # Router & RouterInterface management (Phase 3)
 │   ├── network.py             # NetworkTopology, Host, Link, & Sample Topology (Phase 3)
-│   └── forwarding.py          # Hop-by-hop packet forwarding engine (Phase 4)
+│   ├── forwarding.py          # Hop-by-hop packet forwarding engine (Phase 4)
+│   └── visualization.py       # Visual graph, timeline, device cards & dashboard (Phase 5)
 │
 ├── tests/
 │   ├── test_ipv6_address.py   # Address module unit tests (44 tests)
 │   ├── test_ipv6_packet.py    # Packet & header unit tests (42 tests)
 │   ├── test_routing_table.py  # Routing table & LPM unit tests (12 tests)
 │   ├── test_router.py         # Router, interfaces & network tests (11 tests)
-│   └── test_forwarding.py     # End-to-end packet forwarding tests (8 tests)
+│   ├── test_forwarding.py     # End-to-end packet forwarding tests (8 tests)
+│   └── test_visualization.py  # Visualization & dashboard tests (10 tests)
 │
-├── app.py                     # Interactive CLI application & demonstration suite
+├── app.py                     # Interactive CLI dashboard & demonstration suite
 ├── requirements.txt           # Test dependencies (pytest)
 ├── README.md                  # Project documentation
 └── .gitignore                 # Standard Python gitignore rules
@@ -121,7 +131,7 @@ ipv6-packet-processing-simulator/
    cd ipv6-packet-processing-simulator
    ```
 
-2. **Install dependencies** (for running test suites):
+2. **Install dependencies** (for testing):
    ```bash
    pip install -r requirements.txt
    ```
@@ -130,116 +140,150 @@ ipv6-packet-processing-simulator/
 
 ## Usage
 
-### 1. Interactive CLI Menu
+### 1. Interactive Dashboard Menu
 Run `app.py` without arguments:
 ```bash
 python app.py
 ```
 **Menu Options**:
-1. Analyze an IPv6 Address or Subnet (Phase 1)
-2. Create & Simulate an IPv6 Packet (Phase 2)
-3. Simulated Routers & IPv6 Routing Tables (Phase 3)
-4. IPv6 Packet Forwarding Simulation (Phase 4)
-5. Run Built-in Showcase Demonstrations (Phases 1 - 4)
-6. Exit
+1. IPv6 Address Analyzer (Phase 1)
+2. IPv6 Packet / Header Simulator (Phase 2)
+3. Network Topology & Device Inspector (Phase 3 & 5)
+4. Router Routing Tables & LPM Inspector (Phase 3 & 5)
+5. Packet Forwarding Simulation & Visual Dashboard (Phase 4 & 5)
+6. Run Built-in Showcase Demonstrations (Phases 1 - 5)
+7. Exit
 
-### 2. Forward Packet from Host A to Host B (Phase 4)
+### 2. Forward Packet from Host A to Host B (Visual Dashboard)
 ```bash
 python app.py forward "Host A" "Host B" "Hello IPv6" 64
 ```
 
 **Output:**
 ```text
+==================================================
+              IPv6 PACKET HEADER
+==================================================
+Version              : 6
+Traffic Class        : 0
+Flow Label           : 0
+Payload Length       : 10 bytes
+Next Header          : UDP (17)
+Hop Limit            : 61
+
+Source Address:
+2001:db8:1::10
+
+Destination Address:
+2001:db8:4::20
+==================================================
+Payload Content:
+Hello IPv6
+==================================================
+
+======================================================================
+          TOPOLOGY VISUALIZATION: SAMPLE 3-ROUTER LINEAR NETWORK
+======================================================================
+
+Network Architecture Diagram:
+----------------------------------------------------------------------
+  +-----------+         +--------+         +--------+         +--------+         +-----------+
+  |  [* Host A *] |---------|  [* R1 *] |---------|  [* R2 *] |---------|  [* R3 *] |---------|  [* Host B *] |
+  +-----------+         +--------+         +--------+         +--------+         +-----------+
+ 2001:db8:1::/64     2001:db8:2::/64    2001:db8:3::/64    2001:db8:4::/64
+----------------------------------------------------------------------
+
+Active Forwarding Path:
+  [Host A] -> [R1] -> [R2] -> [R3] -> [Host B]
+
+Device Inventory:
+  Hosts   : Host A, Host B
+  Routers : R1, R2, R3
+  Subnets : 4 configured links
+======================================================================
+
+PACKET PROCESSING TIMELINE
 ============================================================
-             IPv6 PACKET FORWARDING SIMULATION
+  [OK] Packet created at Host A
+        |
+        v
+  [OK] Packet received by R1
+        |
+        v
+  [OK] R1 performing route lookup
+        |
+        v
+  [OK] R1 selected route (Longest Prefix Match)
+        |
+        v
+  [OK] R1 forwarding packet via eth1
+        |
+        v
+  [OK] Packet received by R2
+        |
+        v
+  [OK] R2 performing route lookup
+        |
+        v
+  [OK] R2 selected route (Longest Prefix Match)
+        |
+        v
+  [OK] R2 forwarding packet via eth1
+        |
+        v
+  [OK] Packet received by R3
+        |
+        v
+  [OK] Destination network is directly connected on R3 (eth1)
+        |
+        v
+  [OK] Packet delivered to Host B
+        |
+        v
+  [OK] PACKET DELIVERED SUCCESSFULLY
 ============================================================
 
-Packet Information:
-------------------------------------------------------------
-Source Address      : 2001:db8:1::10 (Host A)
-Destination Address : 2001:db8:4::20 (Host B)
-Payload             : Hello IPv6
-Payload Length      : 10 bytes
-Next Header         : UDP (17)
-Initial Hop Limit   : 64
-
-Forwarding Path:
-------------------------------------------------------------
-  Host A
-    |
-    v
-  R1
-    |
-    v
-  R2
-    |
-    v
-  R3
-    |
-    v
-  Host B
-
-Forwarding Result:
-------------------------------------------------------------
-Status              : DELIVERED
-Reason / Details    : Packet delivered successfully
-Initial Hop Limit   : 64
-Final Hop Limit     : 61
-Routers Traversed   : 3 (R1, R2, R3)
-
-============================================================
-                 DETAILED FORWARDING EVENT LOG
-============================================================
-[1] Packet created at Host A
-    Source      : 2001:db8:1::10
-    Destination : 2001:db8:4::20
-    Hop Limit   : 64
-[2] Packet received by R1
-    Hop Limit   : 64
-[3] R1 performing route lookup
-    Destination : 2001:db8:4::20
-[4] R1 selected route (Longest Prefix Match)
-    Prefix      : 2001:db8:4::/64
-    Next Hop    : 2001:db8:2::2
-    Interface   : eth1
-[5] R1 forwarding packet via eth1
-    Hop Limit   : 64 -> 63
-[6] Packet received by R2
-    Hop Limit   : 63
-[7] R2 performing route lookup
-    Destination : 2001:db8:4::20
-[8] R2 selected route (Longest Prefix Match)
-    Prefix      : 2001:db8:4::/64
-    Next Hop    : 2001:db8:3::2
-    Interface   : eth1
-[9] R2 forwarding packet via eth1
-    Hop Limit   : 63 -> 62
-[10] Packet received by R3
-    Hop Limit   : 62
-[11] Destination network is directly connected on R3 (eth1)
-    Hop Limit   : 62 -> 61
-[12] Packet delivered to Host B
-[13] PACKET DELIVERED SUCCESSFULLY
-============================================================
+Forwarding Statistics
+---------------------------------------------
+Status                 : DELIVERED
+Reason / Details       : Packet delivered successfully
+Initial Hop Limit      : 64
+Final Hop Limit        : 61
+Routers Traversed      : 3 (R1, R2, R3)
+Total Event Steps      : 13
+Source Address         : 2001:db8:1::10 (Host A)
+Destination Address    : 2001:db8:4::20 (Host B)
+---------------------------------------------
 ```
 
-### 3. Test Hop Limit Expiration Drop
+### 3. Inspect Device Cards
 ```bash
-python app.py forward "Host A" "Host B" "Hello IPv6" 1
+python app.py device "Host A"
+python app.py device "R1"
 ```
 
-**Output Status:** `DROPPED_HOP_LIMIT` (Reason: Hop Limit expired at router R1).
-
-### 4. Test No-Route Drop
+### 4. Direct Route Lookup
 ```bash
-python app.py forward "Host A" "2001:db8:99::10" "Test" 64
+python app.py route R1 2001:db8:4::20
 ```
-
-**Output Status:** `DROPPED_NO_ROUTE` (Reason: No matching route found in routing table of R1).
 
 ### 5. Run Full Demonstration Showcase
 ```bash
 python app.py --demo
+```
+
+---
+
+## Screenshots
+
+```text
+screenshots/
+├── address-analysis.png
+├── ipv6-header.png
+├── topology.png
+├── routing-table.png
+├── successful-forwarding.png
+└── packet-drop.png
 ```
 
 ---
@@ -257,9 +301,5 @@ pytest tests/ -v
 - `test_routing_table.py`: 12 passed
 - `test_router.py`: 11 passed
 - `test_forwarding.py`: 8 passed
-- **Total: 117 tests passed in 0.28s**
-
----
-
-## Roadmap (Phase 5)
-- **Phase 5**: Interactive Streamlit Web Application featuring dynamic network topology visualization, packet creation controls, hop-by-hop animation, and real-time header inspection.
+- `test_visualization.py`: 10 passed
+- **Total: 127 tests passed in 0.34s**

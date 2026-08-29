@@ -5,6 +5,7 @@ Phase 1: IPv6 Addressing & Project Foundation.
 Phase 2: IPv6 Packet & Header Simulation.
 Phase 3: Simulated Routers & IPv6 Routing Tables.
 Phase 4: IPv6 Packet Forwarding Simulation.
+Phase 5: Interactive Network Visualization & Simulation Dashboard.
 """
 
 from src.ipv6_address import (
@@ -39,6 +40,9 @@ from src.forwarding import (
     PacketForwarder,
     forward_packet,
 )
+from src.visualization import (
+    NetworkVisualizer,
+)
 
 __all__ = [
     "IPv6AddressAnalyzer",
@@ -61,4 +65,5 @@ __all__ = [
     "ForwardingStep",
     "PacketForwarder",
     "forward_packet",
+    "NetworkVisualizer",
 ]

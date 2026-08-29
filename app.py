@@ -1,11 +1,13 @@
 """
-IPv6 Packet Processing Simulator - CLI Application (Phases 1, 2, 3, & 4)
+IPv6 Packet Processing Simulator - Interactive Dashboard & CLI Application (Phases 1 - 5)
 
 This application provides:
 1. Phase 1: IPv6 address parsing, validation, classification, and subnet analysis.
 2. Phase 2: IPv6 packet creation, base header simulation, and payload inspection.
 3. Phase 3: Simulated routers, IPv6 interfaces, routing tables, and Longest Prefix Match (LPM).
 4. Phase 4: End-to-end hop-by-hop packet forwarding simulation across multi-router topology.
+5. Phase 5: Interactive network visualization, device cards, step-by-step movement snapshots,
+   forwarding timelines, and statistics dashboards.
 """
 
 import sys
@@ -14,14 +16,15 @@ from src.ipv6_packet import IPv6Packet, create_ipv6_packet
 from src.router import Router
 from src.network import Host, NetworkTopology, build_sample_topology
 from src.forwarding import ForwardingResult, ForwardingStatus, PacketForwarder, forward_packet
+from src.visualization import NetworkVisualizer
 
 
 def display_banner():
     """Print project header banner."""
-    print("=" * 65)
-    print("      IPv6 PACKET PROCESSING SIMULATOR (PHASES 1 - 4)")
-    print("  Addressing Engine | Packet Header | Routing Tables | Forwarding")
-    print("=" * 65)
+    print("=" * 70)
+    print("      IPv6 PACKET PROCESSING SIMULATOR (PHASES 1 - 5)")
+    print(" Addressing | Packet Header | Routing Tables | Forwarding | Dashboard")
+    print("=" * 70)
 
 
 def process_and_display_address(address_input: str):
@@ -35,7 +38,7 @@ def process_and_display_address(address_input: str):
 
 def interactive_packet_creation():
     """Prompt user for packet fields, create and display the simulated IPv6 packet."""
-    print("\n--- Create & Simulate an IPv6 Packet ---")
+    print("\n--- 2. Create & Simulate an IPv6 Packet ---")
     try:
         src = input("Source IPv6 Address      : ").strip()
         if not src:
@@ -75,7 +78,7 @@ def interactive_packet_creation():
         )
 
         print()
-        print(packet.display_header())
+        print(NetworkVisualizer.format_header_view(packet))
         print()
 
         # Display forwarding summary
@@ -94,27 +97,63 @@ def interactive_packet_creation():
         print("\nPacket creation cancelled.\n")
 
 
-def interactive_router_menu(topology: NetworkTopology):
-    """Submenu for Router and Routing Table operations."""
+def interactive_device_inspector(topology: NetworkTopology):
+    """Submenu for inspecting network topology and devices."""
     while True:
-        print("\n--- Router & Routing Table Submenu ---")
-        print("  1. Display Network Topology Diagram")
-        print("  2. Inspect Router (Interfaces & Routing Table)")
-        print("  3. Perform Route Lookup (Longest Prefix Match)")
-        print("  4. Demonstrate LPM with Overlapping Prefixes")
-        print("  5. Return to Main Menu")
+        print("\n--- 3. Network Topology & Device Inspector ---")
+        print("  1. View Network Architecture Diagram")
+        print("  2. Inspect Device Card (Host A, Host B, R1, R2, R3)")
+        print("  3. List All Configured Links & Subnets")
+        print("  4. Return to Main Menu")
         print()
 
         try:
-            choice = input("Select an option (1-5): ").strip()
+            choice = input("Select an option (1-4): ").strip()
         except (KeyboardInterrupt, EOFError):
             break
 
         if choice == "1":
             print()
-            print(topology.display_topology())
+            print(NetworkVisualizer.format_topology_graph(topology))
             print()
         elif choice == "2":
+            all_devices = list(topology.hosts.keys()) + list(topology.routers.keys())
+            print(f"\nAvailable Devices: {', '.join(all_devices)}")
+            dev_name = input("Enter device name (e.g. Host A, R1): ").strip()
+            if dev_name:
+                print()
+                print(NetworkVisualizer.format_device_details(dev_name, topology))
+                print()
+            else:
+                print("Error: Device name cannot be empty.\n")
+        elif choice == "3":
+            print("\nConfigured Subnet Links:")
+            print("-" * 65)
+            for link in topology.links:
+                print(f"  {link.node_a} ({link.interface_a}) <---> {link.node_b} ({link.interface_b}) on Subnet: {link.network}")
+            print("-" * 65 + "\n")
+        elif choice == "4" or choice.lower() in ("b", "back"):
+            break
+        else:
+            print("\nInvalid choice. Please select 1-4.\n")
+
+
+def interactive_routing_menu(topology: NetworkTopology):
+    """Submenu for Router and Routing Table operations."""
+    while True:
+        print("\n--- 4. Router Routing Tables & LPM Inspector ---")
+        print("  1. Display Router Routing Table (R1, R2, R3)")
+        print("  2. Perform Route Lookup on Router")
+        print("  3. Demonstrate Longest Prefix Match (LPM) Showcase")
+        print("  4. Return to Main Menu")
+        print()
+
+        try:
+            choice = input("Select an option (1-4): ").strip()
+        except (KeyboardInterrupt, EOFError):
+            break
+
+        if choice == "1":
             print(f"\nAvailable Routers: {', '.join(topology.routers.keys())}")
             r_name = input("Enter router name (e.g. R1, R2, R3): ").strip()
             router = topology.get_router(r_name)
@@ -124,7 +163,7 @@ def interactive_router_menu(topology: NetworkTopology):
                 print()
             else:
                 print(f"Error: Router '{r_name}' not found in topology.\n")
-        elif choice == "3":
+        elif choice == "2":
             print(f"\nAvailable Routers: {', '.join(topology.routers.keys())}")
             r_name = input("Select Router (e.g. R1): ").strip()
             router = topology.get_router(r_name)
@@ -141,20 +180,20 @@ def interactive_router_menu(topology: NetworkTopology):
             print()
             print(router.format_lookup_result(result))
             print()
-        elif choice == "4":
+        elif choice == "3":
             demonstrate_lpm()
-        elif choice == "5" or choice.lower() in ("b", "back"):
+        elif choice == "4" or choice.lower() in ("b", "back"):
             break
         else:
-            print("\nInvalid choice. Please select 1-5.\n")
+            print("\nInvalid choice. Please select 1-4.\n")
 
 
-def interactive_forwarding_menu(topology: NetworkTopology):
-    """Interactive forwarding simulation prompt."""
-    print("\n" + "=" * 65)
-    print("       IPv6 PACKET FORWARDING SIMULATION (PHASE 4)")
-    print("=" * 65)
-    print("Configured Hosts:")
+def interactive_forwarding_dashboard(topology: NetworkTopology):
+    """Interactive forwarding simulation visual dashboard."""
+    print("\n" + "=" * 70)
+    print("   5. IPv6 PACKET FORWARDING SIMULATION & VISUAL DASHBOARD")
+    print("=" * 70)
+    print("Configured Network Hosts:")
     for h in topology.hosts.values():
         print(f"  - {h.name}: {h.ipv6_address} (GW: {h.default_gateway})")
     print()
@@ -200,15 +239,36 @@ def interactive_forwarding_menu(topology: NetworkTopology):
             hop_limit=hl,
         )
 
-        print("\nStarting Forwarding Engine...\n")
+        print("\nExecuting Forwarding Simulation...\n")
         result = forward_packet(
             packet=packet,
             topology=topology,
             source_host_name=src_host_obj.name if src_host_obj else None,
         )
 
-        # Display Comprehensive Report
-        print(result.format_report())
+        # 1. Display Packet Header View
+        print(NetworkVisualizer.format_header_view(packet))
+        print()
+
+        # 2. Display Topology Diagram with Path Highlight
+        print(NetworkVisualizer.format_topology_graph(topology, active_path=result.path))
+        print()
+
+        # 3. Display Step-by-Step Movement Snapshots
+        print("=" * 70)
+        print("          STEP-BY-STEP PACKET MOVEMENT SNAPSHOTS")
+        print("=" * 70)
+        snapshots = NetworkVisualizer.format_packet_movement_steps(result)
+        for s in snapshots:
+            print(s)
+            print()
+
+        # 4. Display Forwarding Timeline
+        print(NetworkVisualizer.format_forwarding_timeline(result))
+        print()
+
+        # 5. Display Forwarding Statistics
+        print(NetworkVisualizer.format_forwarding_stats(result))
         print()
 
     except ValueError as err:
@@ -219,9 +279,9 @@ def interactive_forwarding_menu(topology: NetworkTopology):
 
 def demonstrate_lpm():
     """Demonstrate Longest Prefix Match resolution using overlapping routes."""
-    print("\n" + "=" * 65)
+    print("\n" + "=" * 70)
     print("      LONGEST PREFIX MATCH (LPM) DEMONSTRATION")
-    print("=" * 65)
+    print("=" * 70)
     demo_router = Router("DemoRouter")
     demo_router.add_interface("eth0", "2001:db8:0::1/32")
     demo_router.add_interface("eth1", "2001:db8:4::1/48")
@@ -246,16 +306,16 @@ def demonstrate_lpm():
         print(f"\n[Test Destination: {dest}] ({desc})")
         res = demo_router.lookup_route(dest)
         print(demo_router.format_lookup_result(res))
-        print("-" * 65)
+        print("-" * 70)
 
 
 def run_sample_demonstration():
-    """Run a complete showcase of Phase 1, Phase 2, Phase 3, and Phase 4 features."""
+    """Run a complete showcase across all Phases (1 - 5)."""
     topo = build_sample_topology()
 
-    print("\n" + "=" * 65)
+    print("\n" + "=" * 70)
     print("             PHASE 1: IPv6 ADDRESSING SHOWCASE")
-    print("=" * 65)
+    print("=" * 70)
 
     address_samples = [
         ("Global / Documentation Address", "2001:db8:1::10"),
@@ -270,65 +330,28 @@ def run_sample_demonstration():
     for label, sample in address_samples:
         print(f"[{label}]")
         process_and_display_address(sample)
-        print("-" * 65)
+        print("-" * 70)
 
-    print("\n" + "=" * 65)
+    print("\n" + "=" * 70)
     print("          PHASE 2: IPv6 PACKET SIMULATION SHOWCASE")
-    print("=" * 65)
+    print("=" * 70)
 
-    packet_samples = [
-        (
-            "Sample 1: UDP Data Packet (Default Flow)",
-            "2001:db8:1::10",
-            "2001:db8:4::20",
-            "Hello IPv6",
-            0,
-            0,
-            "UDP",
-            64,
-        ),
-        (
-            "Sample 2: TCP SYN Packet (QoS Traffic Class)",
-            "2001:db8:1::100",
-            "2001:db8:2::200",
-            "SYN_REQ",
-            64,
-            12345,
-            "TCP",
-            128,
-        ),
-        (
-            "Sample 3: ICMPv6 Ping Request",
-            "fe80::1",
-            "ff02::1",
-            "EchoRequest",
-            0,
-            0,
-            "ICMPv6",
-            255,
-        ),
-    ]
+    pkt_demo = create_ipv6_packet(
+        source_address="2001:db8:1::10",
+        destination_address="2001:db8:4::20",
+        payload="Hello IPv6",
+        next_header="UDP",
+        hop_limit=64,
+    )
+    print(NetworkVisualizer.format_header_view(pkt_demo))
+    print("-" * 70)
 
-    for label, src, dst, payload, tc, fl, proto, hl in packet_samples:
-        print(f"\n[{label}]")
-        pkt = create_ipv6_packet(
-            source_address=src,
-            destination_address=dst,
-            payload=payload,
-            traffic_class=tc,
-            flow_label=fl,
-            next_header=proto,
-            hop_limit=hl,
-        )
-        print(pkt.display_header())
-        print("-" * 65)
-
-    print("\n" + "=" * 65)
+    print("\n" + "=" * 70)
     print("       PHASE 3: ROUTERS, ROUTING TABLES & LPM SHOWCASE")
-    print("=" * 65)
+    print("=" * 70)
 
     # Topology display
-    print(topo.display_topology())
+    print(NetworkVisualizer.format_topology_graph(topo))
     print()
 
     # Route lookup on R1 for Host B
@@ -339,32 +362,43 @@ def run_sample_demonstration():
         print("[Route Lookup: R1 -> Host B (2001:db8:4::20)]")
         res = r1.lookup_route("2001:db8:4::20")
         print(r1.format_lookup_result(res))
-        print("-" * 65)
+        print("-" * 70)
 
-    print("\n" + "=" * 65)
-    print("     PHASE 4: IPv6 PACKET FORWARDING ENGINE SHOWCASE")
-    print("=" * 65)
+    # Longest Prefix Match Showcase
+    demonstrate_lpm()
 
-    # 1. Successful Multi-Hop Delivery
-    print("\n[Forwarding Case 1: Host A -> Host B (Successful Delivery, Hop Limit = 64)]")
-    pkt1 = create_ipv6_packet("2001:db8:1::10", "2001:db8:4::20", payload="Hello IPv6 from Host A", hop_limit=64)
+    print("\n" + "=" * 70)
+    print("     PHASE 4 & 5: PACKET FORWARDING & VISUAL DASHBOARD")
+    print("=" * 70)
+
+    # 1. Successful Multi-Hop Delivery Dashboard
+    print("\n[Scenario 1: Successful Multi-Hop Forwarding (Host A -> Host B)]")
+    pkt1 = create_ipv6_packet("2001:db8:1::10", "2001:db8:4::20", payload="Hello from Host A", hop_limit=64)
     res1 = forward_packet(pkt1, topo, source_host_name="Host A")
-    print(res1.format_report())
-    print("-" * 65)
+    print(NetworkVisualizer.format_topology_graph(topo, active_path=res1.path))
+    print()
+    print(NetworkVisualizer.format_forwarding_timeline(res1))
+    print()
+    print(NetworkVisualizer.format_forwarding_stats(res1))
+    print("-" * 70)
 
     # 2. Hop Limit Expiration Drop
-    print("\n[Forwarding Case 2: Hop Limit Expiration Drop (Initial Hop Limit = 1)]")
+    print("\n[Scenario 2: Hop Limit Expiration Drop (Initial Hop Limit = 1)]")
     pkt2 = create_ipv6_packet("2001:db8:1::10", "2001:db8:4::20", payload="Expiring Packet", hop_limit=1)
     res2 = forward_packet(pkt2, topo, source_host_name="Host A")
-    print(res2.format_report())
-    print("-" * 65)
+    print(NetworkVisualizer.format_forwarding_timeline(res2))
+    print()
+    print(NetworkVisualizer.format_forwarding_stats(res2))
+    print("-" * 70)
 
     # 3. No Route Drop
-    print("\n[Forwarding Case 3: No Matching Route Drop (Destination: 2001:db8:99::10)]")
+    print("\n[Scenario 3: No Matching Route Drop (Destination: 2001:db8:99::10)]")
     pkt3 = create_ipv6_packet("2001:db8:1::10", "2001:db8:99::10", payload="Unroutable Packet", hop_limit=64)
     res3 = forward_packet(pkt3, topo, source_host_name="Host A")
-    print(res3.format_report())
-    print("-" * 65)
+    print(NetworkVisualizer.format_forwarding_timeline(res3))
+    print()
+    print(NetworkVisualizer.format_forwarding_stats(res3))
+    print("-" * 70)
 
 
 def interactive_mode():
@@ -374,16 +408,17 @@ def interactive_mode():
 
     while True:
         print("Main Menu:")
-        print("  1. Analyze an IPv6 Address or Subnet (Phase 1)")
-        print("  2. Create & Simulate an IPv6 Packet (Phase 2)")
-        print("  3. Simulated Routers & IPv6 Routing Tables (Phase 3)")
-        print("  4. IPv6 Packet Forwarding Simulation (Phase 4)")
-        print("  5. Run Built-in Showcase Demonstrations (Phases 1 - 4)")
-        print("  6. Exit")
+        print("  1. IPv6 Address Analyzer (Phase 1)")
+        print("  2. IPv6 Packet / Header Simulator (Phase 2)")
+        print("  3. Network Topology & Device Inspector (Phase 3 & 5)")
+        print("  4. Router Routing Tables & LPM Inspector (Phase 3 & 5)")
+        print("  5. Packet Forwarding Simulation & Visual Dashboard (Phase 4 & 5)")
+        print("  6. Run Built-in Showcase Demonstrations (Phases 1 - 5)")
+        print("  7. Exit")
         print()
 
         try:
-            choice = input("Select an option (1-6): ").strip()
+            choice = input("Select an option (1-7): ").strip()
         except (KeyboardInterrupt, EOFError):
             print("\nExiting. Goodbye!")
             break
@@ -400,16 +435,18 @@ def interactive_mode():
         elif choice == "2":
             interactive_packet_creation()
         elif choice == "3":
-            interactive_router_menu(topology)
+            interactive_device_inspector(topology)
         elif choice == "4":
-            interactive_forwarding_menu(topology)
+            interactive_routing_menu(topology)
         elif choice == "5":
+            interactive_forwarding_dashboard(topology)
+        elif choice == "6":
             run_sample_demonstration()
-        elif choice == "6" or choice.lower() in ("q", "quit", "exit"):
+        elif choice == "7" or choice.lower() in ("q", "quit", "exit"):
             print("\nExiting IPv6 Packet Processing Simulator. Goodbye!")
             break
         else:
-            print("\nInvalid choice. Please select 1, 2, 3, 4, 5, or 6.\n")
+            print("\nInvalid choice. Please select 1, 2, 3, 4, 5, 6, or 7.\n")
 
 
 def main():
@@ -424,16 +461,23 @@ def main():
             run_sample_demonstration()
         elif first_arg in ("--help", "-h", "help"):
             print("Usage:")
-            print("  python app.py                                              # Interactive menu mode")
+            print("  python app.py                                              # Interactive dashboard mode")
             print("  python app.py <ipv6_address>                               # Analyze address (Phase 1)")
             print("  python app.py <ipv6_cidr>                                  # Analyze subnet (Phase 1)")
             print("  python app.py packet <src> <dst> [payload] [proto] [hop]   # Simulate packet (Phase 2)")
-            print("  python app.py topology                                     # Display network topology (Phase 3)")
+            print("  python app.py topology                                     # Display network topology (Phase 3 & 5)")
+            print("  python app.py device <device_name>                         # Inspect device card (Phase 5)")
             print("  python app.py route <router_name> <dest_ip>                # Route lookup (Phase 3)")
             print("  python app.py forward <src_host_or_ip> <dst_host_or_ip> [payload] [hop_limit]")
             print("  python app.py --demo                                       # Run full showcase demo")
         elif first_arg == "topology":
-            print(topology.display_topology())
+            print(NetworkVisualizer.format_topology_graph(topology))
+        elif first_arg == "device":
+            if len(sys.argv) < 3:
+                print("Usage: python app.py device <device_name>")
+                return
+            dev_name = sys.argv[2]
+            print(NetworkVisualizer.format_device_details(dev_name, topology))
         elif first_arg == "route":
             if len(sys.argv) < 4:
                 print("Usage: python app.py route <router_name> <destination_ip>")
@@ -474,7 +518,13 @@ def main():
                     topology=topology,
                     source_host_name=src_host.name if src_host else None,
                 )
-                print(res.format_report())
+                print(NetworkVisualizer.format_header_view(pkt))
+                print()
+                print(NetworkVisualizer.format_topology_graph(topology, active_path=res.path))
+                print()
+                print(NetworkVisualizer.format_forwarding_timeline(res))
+                print()
+                print(NetworkVisualizer.format_forwarding_stats(res))
             except ValueError as err:
                 print(f"Forwarding execution error: {err}")
         elif first_arg == "packet":
@@ -488,7 +538,7 @@ def main():
             hl = int(sys.argv[6]) if len(sys.argv) > 6 else 64
             try:
                 pkt = create_ipv6_packet(src, dst, payload=payload, next_header=proto, hop_limit=hl)
-                print(pkt.display_header())
+                print(NetworkVisualizer.format_header_view(pkt))
             except ValueError as err:
                 print(f"Error creating packet: {err}")
         else:
