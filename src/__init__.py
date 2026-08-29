@@ -2,6 +2,8 @@
 IPv6 Packet Processing Simulator - Core Package.
 
 Phase 1: IPv6 Addressing & Project Foundation.
+Phase 2: IPv6 Packet & Header Simulation.
+Phase 3: Simulated Routers & IPv6 Routing Tables.
 """
 
 from src.ipv6_address import (
@@ -10,10 +12,40 @@ from src.ipv6_address import (
     analyze_ipv6,
     validate_ipv6,
 )
+from src.ipv6_packet import (
+    IPv6Packet,
+    NextHeaderProtocol,
+    create_ipv6_packet,
+)
+from src.routing_table import (
+    Route,
+    RoutingTable,
+)
+from src.router import (
+    Router,
+    RouterInterface,
+)
+from src.network import (
+    Host,
+    Link,
+    NetworkTopology,
+    build_sample_topology,
+)
 
 __all__ = [
     "IPv6AddressAnalyzer",
     "IPv6AnalysisResult",
     "analyze_ipv6",
     "validate_ipv6",
+    "IPv6Packet",
+    "NextHeaderProtocol",
+    "create_ipv6_packet",
+    "Route",
+    "RoutingTable",
+    "Router",
+    "RouterInterface",
+    "Host",
+    "Link",
+    "NetworkTopology",
+    "build_sample_topology",
 ]

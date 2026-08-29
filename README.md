@@ -1,47 +1,91 @@
 # IPv6 Packet Processing Simulator
 
-An educational and modular network simulator designed to demonstrate IPv6 address mechanics, packet header structures, extension headers, and hop-by-hop packet processing.
+An educational and modular network simulator designed to demonstrate IPv6 address mechanics, packet header structures, extension headers, router architectures, routing tables, and hop-by-hop packet processing.
 
 ---
 
-## Phase 1: IPv6 Addressing & Project Foundation
+## Project Phases Overview
 
-### Objective
-The goal of **Phase 1** is to establish the core project structure and implement the IPv6 addressing module. It allows users to parse, validate, expand, compress, classify, and analyze IPv6 addresses and subnet prefixes.
+- **Phase 1 (Completed)**: IPv6 Addressing Engine & Project Foundation
+- **Phase 2 (Completed)**: IPv6 Packet & Fixed 40-Byte Header Simulation
+- **Phase 3 (Completed)**: Simulated Routers, IPv6 Interfaces, Routing Tables & Longest Prefix Match (LPM)
+- **Phase 4 (Upcoming)**: End-to-End Hop-by-Hop Packet Forwarding Engine & Routing Simulation
+- **Phase 5 (Upcoming)**: Interactive Streamlit Web UI & Real-Time Path Visualization
 
 > [!NOTE]
-> Packet forwarding, routing tables, and IPv6 header simulation are part of subsequent phases and are **not** included in Phase 1. Streamlit web UI integration will also be introduced in later phases.
+> Packet forwarding, Hop Limit decrementing across hops, and transmission along the path are part of **Phase 4**. Phase 3 models routers, interface binding, connected/static routes, and next-hop decision making via Longest Prefix Match (LPM).
 
 ---
 
 ## Technologies Used
 - **Language**: Python 3.10+
-- **Standard Library**: `ipaddress` (built-in module for robust IPv6 parsing and network calculations)
+- **Standard Library**: `ipaddress` (built-in module for robust IPv6 parsing, subnet matching, and routing)
 - **Testing**: `pytest`
 
 ---
 
-## Current Features (Phase 1)
-- **Address Validation**: Validates plain IPv6 addresses (`2001:db8::1`) and CIDR interface/network notations (`2001:db8::1/64`) with detailed error messages.
-- **Representations**:
-  - RFC 5952 standard compressed format (e.g. `2001:db8:1::10`)
-  - Full 8-group expanded/exploded format (e.g. `2001:0db8:0001:0000:0000:0000:0000:0010`)
-  - 128-bit confirmation, integer, hex, and binary representations
-- **Address Classification**:
-  - Global Unicast (`2000::/3`)
-  - Link-Local Unicast (`fe80::/10`)
-  - Unique Local / Private (`fc00::/7`)
-  - Loopback (`::1`)
-  - Unspecified (`::`)
-  - Multicast (`ff00::/8`) with scope detection (Node-Local, Link-Local, Site-Local, Global)
-  - Documentation prefix (`2001:db8::/32`)
-- **Prefix & Subnet Analysis**:
-  - Network address calculation
-  - Prefix length extraction
-  - Subnet netmask and hostmask
-  - Interface Identifier (IID) / Host portion breakdown
-  - Subnet total address capacity (e.g., $2^{64}$)
-- **Interactive CLI & Direct Command Mode**: Terminal utility with interactive menu, direct address argument support, and built-in showcase demos.
+## Simulated Network Architecture (Phase 3)
+
+```text
+  [Host A] (2001:db8:1::10/64)  -- Gateway: 2001:db8:1::1
+     |
+   (Subnet: 2001:db8:1::/64)
+     |
+  [Router R1]
+     +-- eth0: 2001:db8:1::1/64   [Connected: 2001:db8:1::/64 -> Direct]
+     +-- eth1: 2001:db8:2::1/64   [Connected: 2001:db8:2::/64 -> Direct]
+     |                            [Static:    2001:db8:3::/64 -> 2001:db8:2::2]
+     |                            [Static:    2001:db8:4::/64 -> 2001:db8:2::2]
+   (Subnet: 2001:db8:2::/64)
+     |
+  [Router R2]
+     +-- eth0: 2001:db8:2::2/64   [Connected: 2001:db8:2::/64 -> Direct]
+     +-- eth1: 2001:db8:3::1/64   [Connected: 2001:db8:3::/64 -> Direct]
+     |                            [Static:    2001:db8:1::/64 -> 2001:db8:2::1]
+     |                            [Static:    2001:db8:4::/64 -> 2001:db8:3::2]
+   (Subnet: 2001:db8:3::/64)
+     |
+  [Router R3]
+     +-- eth0: 2001:db8:3::2/64   [Connected: 2001:db8:3::/64 -> Direct]
+     +-- eth1: 2001:db8:4::1/64   [Connected: 2001:db8:4::/64 -> Direct]
+     |                            [Static:    2001:db8:1::/64 -> 2001:db8:3::1]
+     |                            [Static:    2001:db8:2::/64 -> 2001:db8:3::1]
+   (Subnet: 2001:db8:4::/64)
+     |
+  [Host B] (2001:db8:4::20/64)  -- Gateway: 2001:db8:4::1
+```
+
+---
+
+## Features
+
+### Phase 1: IPv6 Addressing Module
+- **Address Validation**: Validates standard IPv6 addresses and CIDR notations with clear error diagnostics.
+- **Representations**: RFC 5952 compressed format, full 8-group expanded format, 128-bit confirmation, integer, hex, and binary strings.
+- **Address Classification**: Global Unicast, Link-Local, Unique Local (Private), Loopback, Unspecified, Multicast (with scope detection), and Documentation prefixes.
+- **Prefix & Subnet Analysis**: Network address, prefix length, netmask, hostmask, 64-bit Interface Identifier (IID), and subnet address capacity.
+
+### Phase 2: IPv6 Packet & Header Simulation
+- **Fixed 40-Byte Base Header Simulation**: Version (6), Traffic Class (0-255), Flow Label (0-1048575), byte-accurate Payload Length calculation, Next Header protocol resolution (`UDP`, `TCP`, `ICMPv6`, `No Next Header`), and Hop Limit (0-255).
+- **Inspection & Summaries**: Clean terminal visualization (`display_header()`), serialization (`to_dict()`), and forwarding summary generator (`get_summary()`).
+
+### Phase 3: Simulated Routers & Routing Tables
+- **Routing Table Engine (`RoutingTable`)**:
+  - Supports **Connected** routes (metric 0, direct delivery) and **Static** routes (configurable next-hop IP and metric).
+  - Validation of destination network prefixes and next-hop IPv6 addresses.
+  - Formatted ASCII routing table inspection.
+- **Longest Prefix Match (LPM)**:
+  - Efficiently evaluates candidate routes for a given destination address.
+  - Automatically selects the route with the most specific (longest) prefix length (e.g. `/64` over `/48` over `/32`).
+  - Gracefully reports "No Route to Host" for unreachable destinations.
+- **Router Entity (`Router` & `RouterInterface`)**:
+  - Models router nodes with multiple named IPv6 interfaces.
+  - **Automatic Connected Route Generation**: Adding an interface automatically registers its directly connected subnet in the routing table.
+  - Removing an interface automatically purges corresponding routes.
+  - Route lookup utility returning matched prefix, selected route, next hop, outgoing interface, and route type.
+- **Network Topology (`NetworkTopology`)**:
+  - Models hosts, routers, and inter-device subnet links.
+  - Built-in factory `build_sample_topology()` creating a 3-router linear topology with end-to-end static routing configured.
 
 ---
 
@@ -51,14 +95,21 @@ The goal of **Phase 1** is to establish the core project structure and implement
 ipv6-packet-processing-simulator/
 │
 ├── src/
-│   ├── __init__.py            # Package initializer & exports
-│   └── ipv6_address.py        # Core IPv6 address analysis module
+│   ├── __init__.py            # Package exports
+│   ├── ipv6_address.py        # Core IPv6 address analysis module (Phase 1)
+│   ├── ipv6_packet.py         # IPv6 packet & header simulation module (Phase 2)
+│   ├── routing_table.py       # Route & RoutingTable with LPM lookup (Phase 3)
+│   ├── router.py              # Router & RouterInterface management (Phase 3)
+│   └── network.py             # NetworkTopology, Host, Link, & Sample Topology (Phase 3)
 │
 ├── tests/
-│   └── test_ipv6_address.py   # Comprehensive pytest test suite (44 test cases)
+│   ├── test_ipv6_address.py   # Address module unit tests (44 tests)
+│   ├── test_ipv6_packet.py    # Packet & header unit tests (42 tests)
+│   ├── test_routing_table.py  # Routing table & LPM unit tests (12 tests)
+│   └── test_router.py         # Router, interfaces & network topology tests (11 tests)
 │
-├── app.py                     # Command-line interface & demonstration app
-├── requirements.txt           # Project dependencies (pytest)
+├── app.py                     # Interactive CLI application & demonstration suite
+├── requirements.txt           # Test dependencies (pytest)
 ├── README.md                  # Project documentation
 └── .gitignore                 # Standard Python gitignore rules
 ```
@@ -82,77 +133,89 @@ ipv6-packet-processing-simulator/
 
 ## Usage
 
-### 1. Interactive Mode
-Run `app.py` without arguments to access the interactive CLI menu:
+### 1. Interactive CLI Menu
+Run `app.py` without arguments:
 ```bash
 python app.py
 ```
+**Menu Options**:
+1. Analyze an IPv6 Address or Subnet (Phase 1)
+2. Create & Simulate an IPv6 Packet (Phase 2)
+3. Simulated Routers & IPv6 Routing Tables (Phase 3)
+4. Run Built-in Showcase Demonstrations (Phase 1, 2, & 3)
+5. Exit
 
-### 2. Direct Address Analysis
-Pass an IPv6 address directly as a command-line argument:
+### 2. Display Network Topology
 ```bash
-python app.py 2001:db8:1::10
+python app.py topology
 ```
 
-**Sample Output:**
+### 3. Perform Route Lookup on a Router
+```bash
+python app.py route R1 2001:db8:4::20
+```
+
+**Output:**
 ```text
-## IPv6 Address Analysis
+ROUTE LOOKUP
+========================================
 
-Input Address : 2001:db8:1::10
-Valid IPv6    : Yes
-Compressed    : 2001:db8:1::10
-Expanded      : 2001:0db8:0001:0000:0000:0000:0000:0010
-Address Type  : Global/Documentation
-Bit Length    : 128
+Router:
+R1
+
+Destination:
+2001:db8:4::20
+
+Matching Prefix:
+2001:db8:4::/64
+
+Selected Route:
+2001:db8:4::/64
+
+Next Hop:
+2001:db8:2::2
+
+Interface:
+eth1
+
+Route Type:
+Static
+========================================
 ```
 
-### 3. Subnet / CIDR Analysis
-Pass an IPv6 address with a prefix length:
+### 4. Create Simulated IPv6 Packet (Phase 2)
+```bash
+python app.py packet 2001:db8:1::10 2001:db8:4::20 "Hello IPv6" UDP 64
+```
+
+### 5. Direct Address Analysis (Phase 1)
 ```bash
 python app.py 2001:db8:1::10/64
 ```
 
-**Sample Output:**
-```text
-## IPv6 Address Analysis
-
-Input Address : 2001:db8:1::10/64
-Valid IPv6    : Yes
-Compressed    : 2001:db8:1::10
-Expanded      : 2001:0db8:0001:0000:0000:0000:0000:0010
-Address Type  : Global/Documentation
-Bit Length    : 128
-
---- Network / Subnet Details ---
-Network       : 2001:db8:1::/64
-Prefix Length : 64
-Network Addr  : 2001:db8:1::
-Netmask       : ffff:ffff:ffff:ffff::
-Host Portion  : ::10
-Interface ID  : 0000:0000:0000:0010
-Total Hosts   : 2^64 (18,446,744,073,709,551,616 addresses)
-```
-
-### 4. Run Built-in Showcase Demo
+### 6. Run Complete Showcase Demo
 ```bash
 python app.py --demo
 ```
 
 ---
 
-## Running Tests
+## Running Automated Tests
 
-Execute the automated test suite with `pytest`:
+Run the comprehensive test suite with `pytest`:
 ```bash
 pytest tests/ -v
 ```
 
-All 44 test cases validate address validity, compression, expansion, subnet calculations, classifications, error handling, and serialization.
+**Test Breakdown**:
+- `test_ipv6_address.py`: 44 passed
+- `test_ipv6_packet.py`: 42 passed
+- `test_routing_table.py`: 12 passed
+- `test_router.py`: 11 passed
+- **Total: 109 tests passed (0.28s)**
 
 ---
 
-## Next Steps (Upcoming Phases)
-- **Phase 2**: IPv6 Packet Header Modeling (Base 40-byte header, Hop Limit, Next Header, Flow Label, Traffic Class).
-- **Phase 3**: IPv6 Extension Headers (Hop-by-Hop Options, Routing Header, Fragment Header, etc.).
-- **Phase 4**: Router Node Simulation & Next-hop Routing / Forwarding Table Lookups.
-- **Phase 5**: Interactive Streamlit Web UI & Visualization.
+## Roadmap (Next Phases)
+- **Phase 4**: End-to-End Hop-by-Hop Packet Forwarding Engine (Hop Limit decrementing, Router traversal, Next-Hop Resolution, Path Tracing).
+- **Phase 5**: Interactive Streamlit Web Application with dynamic visual graph animations.
