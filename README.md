@@ -1,25 +1,27 @@
 # IPv6 Packet Processing Simulator
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-FF4B4B.svg)](https://streamlit.io/)
 [![Tests](https://img.shields.io/badge/Tests-132%20Passed-brightgreen.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-An educational and modular network simulator designed to demonstrate IPv6 address mechanics, fixed 40-byte packet headers, multi-interface router architectures, Longest Prefix Match (LPM) routing tables, hop-by-hop packet forwarding, and interactive visual dashboards.
+An interactive, educational computer networks laboratory simulator designed to demonstrate IPv6 address mechanics, fixed 40-byte packet headers, multi-interface router architectures, Longest Prefix Match (LPM) routing tables, hop-by-hop packet forwarding, and rich visual dashboards in both **Terminal CLI** and **Streamlit Web UI**.
 
 ---
 
 ## Table of Contents
 - [Project Overview](#project-overview)
-- [System Architecture](#system-architecture)
+- [Dual-Interface Architecture](#dual-interface-architecture)
 - [Simulated Network Topology](#simulated-network-topology)
 - [Core Features](#core-features)
 - [How Packet Forwarding Works](#how-packet-forwarding-works)
 - [Standardized Test Scenarios](#standardized-test-scenarios)
 - [Installation & Setup](#installation--setup)
 - [Usage & Execution](#usage--execution)
-  - [Interactive Dashboard](#1-interactive-dashboard)
-  - [Standalone Lab Demonstration](#2-standalone-laboratory-demo)
-  - [CLI Direct Commands](#3-cli-direct-commands)
+  - [1. Streamlit Interactive Web Interface](#1-streamlit-interactive-web-interface)
+  - [2. Terminal Dashboard Interface](#2-terminal-dashboard-interface)
+  - [3. Standalone Laboratory Demonstration](#3-standalone-laboratory-demonstration)
+  - [4. Direct CLI Commands](#4-direct-cli-commands)
 - [Running Automated Tests](#running-automated-tests)
 - [Screenshots](#screenshots)
 - [Project Structure](#project-structure)
@@ -30,39 +32,43 @@ An educational and modular network simulator designed to demonstrate IPv6 addres
 
 ## Project Overview
 
-The **IPv6 Packet Processing Simulator** models the lifecycle of IPv6 network packets without requiring administrative OS permissions, raw sockets, or third-party packet capturers. It provides a pure, deterministic simulation engine that illustrates:
+The **IPv6 Packet Processing Simulator** models the complete lifecycle of IPv6 network packets without requiring administrative OS permissions, raw sockets, or third-party packet sniffers. It provides a pure, deterministic simulation engine that illustrates:
 
 1. **IPv6 Addressing**: RFC 5952 compression, 8-group expansion, classification, and CIDR subnet math.
 2. **Base Header Modeling**: 40-byte fixed header construction, byte-accurate payload length calculation, and Next Header multiplexing.
 3. **Router Mechanics**: Multi-interface virtual routers with automatic connected route registration.
 4. **Longest Prefix Match (LPM)**: Resolving overlapping routing table entries (`/64` vs `/48` vs `/32`).
 5. **Hop-by-Hop Forwarding**: Default gateway dispatch, Hop Limit checking & decrementing, next-hop resolution, direct subnet delivery, and drop detection.
-6. **Visual Inspection**: ASCII topology graphs, device specification cards, step-by-step movement snapshots, and execution event timelines.
+6. **Visual Inspection**: ASCII diagrams, Streamlit web views, device cards, movement snapshots, and execution event timelines.
 
 ---
 
-## System Architecture
+## Dual-Interface Architecture
+
+The simulator cleanly decouples the core networking simulation engine from presentation layers:
 
 ```text
-User Input / CLI / Demo Script
-              ↓
-  [IPv6 Address Analyzer]   --> Validates & Expands IPv6 Addresses
-              ↓
-  [IPv6 Packet Generator]   --> Builds 40-Byte Base Header (Version=6, Hop Limit, Next Header)
-              ↓
-     [Source Host]          --> Selects Default Gateway Router Interface
-              ↓
-    [Router Traversal]      --> Evaluates Destination IP via Routing Table
-              ↓
-  [Longest Prefix Match]    --> Selects Most Specific Prefix Route
-              ↓
-  [Hop Limit Processing]    --> Drops if Hop Limit <= 1, else Decrements (HL = HL - 1)
-              ↓
-     [Next Router]          --> Continues Traversal across Links
-              ↓
-  [Destination Delivery]    --> Successfully Delivered to Destination Host (or Dropped)
-              ↓
-  [Visual Dashboard]        --> Renders ASCII Diagram, Movement Snapshots, Timeline, Stats
+       ┌───────────────────────────────┐       ┌───────────────────────────────┐
+       │   Streamlit Web Interface     │       │     Terminal CLI Interface    │
+       │     (streamlit_app.py)        │       │       (app.py / demo.py)      │
+       └───────────────┬───────────────┘       └───────────────┬───────────────┘
+                       │                                       │
+                       └───────────────────┬───────────────────┘
+                                           │
+                                           v
+                       ┌───────────────────────────────────────┐
+                       │         Shared Core Engine            │
+                       │             (src/)                    │
+                       ├───────────────────────────────────────┤
+                       │  • src/ipv6_address.py                │
+                       │  • src/ipv6_packet.py                 │
+                       │  • src/routing_table.py               │
+                       │  • src/router.py                      │
+                       │  • src/host.py                        │
+                       │  • src/network.py                     │
+                       │  • src/forwarding.py                  │
+                       │  • src/visualization.py               │
+                       └───────────────────────────────────────┘
 ```
 
 ---
@@ -129,11 +135,11 @@ User Input / CLI / Demo Script
   - Preservation of original packet fields throughout transmission.
 
 - **Visual Dashboard & Presentation**:
+  - Interactive Streamlit Web UI with metric cards, tables, and sliders.
   - ASCII network architecture diagrams with highlighted active paths (`[* Host A *] -> ...`).
   - Device inspection cards for Hosts and Routers.
   - Step-by-step sequential packet movement snapshots.
   - Visual packet processing event timelines (`[OK]`, `[X]`).
-  - Summary statistics tables.
 
 ---
 
@@ -192,7 +198,7 @@ The simulator includes 5 built-in educational test scenarios:
    source venv/bin/activate
    ```
 
-3. **Install test dependencies**:
+3. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
@@ -201,34 +207,32 @@ The simulator includes 5 built-in educational test scenarios:
 
 ## Usage & Execution
 
-### 1. Interactive Dashboard
-Launch the unified interactive simulator menu:
+### 1. Streamlit Interactive Web Interface
+Launch the browser-based dashboard locally:
+```bash
+streamlit run streamlit_app.py
+```
+*Opens an interactive web cockpit in your browser (`http://localhost:8501`) featuring Address Analyzers, Header Builders, Topology Inspectors, Routing Table lookups, and Packet Forwarding Cockpits.*
+
+---
+
+### 2. Terminal Dashboard Interface
+Launch the interactive terminal menu:
 ```bash
 python app.py
 ```
-```text
-======================================================================
-             IPv6 PACKET PROCESSING SIMULATOR
- Educational Computer Networks Laboratory Simulation Dashboard
-======================================================================
-Main Menu:
-  [1] IPv6 Address Analyzer (Phase 1)
-  [2] IPv6 Packet Simulator (Phase 2)
-  [3] Network Topology & Device Inspector (Phase 3 & 5)
-  [4] Routing Tables & LPM Inspector (Phase 3 & 5)
-  [5] Packet Forwarding Simulation (Phase 4 & 5)
-  [6] Predefined Test Scenarios Runner (Phase 6)
-  [7] Complete Showcase Demonstration (Phases 1 - 6)
-  [8] Exit
-```
 
-### 2. Standalone Laboratory Demo
+---
+
+### 3. Standalone Laboratory Demonstration
 Run the zero-input demonstration script:
 ```bash
 python demo.py
 ```
 
-### 3. CLI Direct Commands
+---
+
+### 4. Direct CLI Commands
 
 - **Forwarding Simulation**:
   ```bash
@@ -322,8 +326,9 @@ ipv6-packet-processing-simulator/
 │   └── .gitkeep               # Directory for visual documentation assets
 │
 ├── app.py                     # Interactive CLI dashboard & demonstration suite
+├── streamlit_app.py           # Interactive Streamlit Web Application
 ├── demo.py                    # Standalone zero-input laboratory demonstration script
-├── requirements.txt           # Test dependencies (pytest)
+├── requirements.txt           # Project dependencies (pytest, streamlit)
 ├── README.md                  # Comprehensive project documentation
 ├── LICENSE                    # MIT open-source license
 └── .gitignore                 # Standard Python gitignore rules
@@ -333,7 +338,6 @@ ipv6-packet-processing-simulator/
 
 ## Future Enhancements
 
-- **Interactive Streamlit Web Dashboard**: Visual browser GUI with animated packet transit graphs, interactive sliders for Hop Limits, and topology builders.
 - **IPv6 Extension Headers**: Hop-by-Hop Options (`0`), Routing Header (`43`), and Fragmentation (`44`).
 - **ICMPv6 Simulation**: Time Exceeded (`Type 3 / Code 0`) and Destination Unreachable (`Type 1 / Code 0`) packet generation.
 - **Neighbor Discovery Protocol (NDP)**: Router Advertisement (RA), Router Solicitation (RS), and Neighbor Solicitation (NS).

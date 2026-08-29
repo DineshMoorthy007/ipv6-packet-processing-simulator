@@ -3,3 +3,6 @@
 
 # Testing Framework
 pytest>=8.0.0
+
+# Interactive Web Application Framework (Phase 7)
+streamlit>=1.30.0
