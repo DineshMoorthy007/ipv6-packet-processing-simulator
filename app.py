@@ -1,24 +1,26 @@
 """
-IPv6 Packet Processing Simulator - CLI Application (Phase 1, Phase 2, & Phase 3)
+IPv6 Packet Processing Simulator - CLI Application (Phases 1, 2, 3, & 4)
 
 This application provides:
 1. Phase 1: IPv6 address parsing, validation, classification, and subnet analysis.
 2. Phase 2: IPv6 packet creation, base header simulation, and payload inspection.
 3. Phase 3: Simulated routers, IPv6 interfaces, routing tables, and Longest Prefix Match (LPM).
+4. Phase 4: End-to-end hop-by-hop packet forwarding simulation across multi-router topology.
 """
 
 import sys
 from src.ipv6_address import IPv6AddressAnalyzer, analyze_ipv6
 from src.ipv6_packet import IPv6Packet, create_ipv6_packet
 from src.router import Router
-from src.network import NetworkTopology, build_sample_topology
+from src.network import Host, NetworkTopology, build_sample_topology
+from src.forwarding import ForwardingResult, ForwardingStatus, PacketForwarder, forward_packet
 
 
 def display_banner():
     """Print project header banner."""
     print("=" * 65)
-    print("      IPv6 PACKET PROCESSING SIMULATOR (PHASE 1, 2, & 3)")
-    print(" Addressing Engine | Packet Simulation | Routers & Routing Tables")
+    print("      IPv6 PACKET PROCESSING SIMULATOR (PHASES 1 - 4)")
+    print("  Addressing Engine | Packet Header | Routing Tables | Forwarding")
     print("=" * 65)
 
 
@@ -147,6 +149,74 @@ def interactive_router_menu(topology: NetworkTopology):
             print("\nInvalid choice. Please select 1-5.\n")
 
 
+def interactive_forwarding_menu(topology: NetworkTopology):
+    """Interactive forwarding simulation prompt."""
+    print("\n" + "=" * 65)
+    print("       IPv6 PACKET FORWARDING SIMULATION (PHASE 4)")
+    print("=" * 65)
+    print("Configured Hosts:")
+    for h in topology.hosts.values():
+        print(f"  - {h.name}: {h.ipv6_address} (GW: {h.default_gateway})")
+    print()
+
+    try:
+        # 1. Source Selection
+        src_choice = input("Enter Source Host name or IPv6 address (default 'Host A'): ").strip()
+        if not src_choice:
+            src_choice = "Host A"
+
+        src_ip = src_choice
+        src_host_obj = topology.get_host(src_choice)
+        if src_host_obj:
+            src_ip = src_host_obj.ipv6_address
+
+        # 2. Destination Selection
+        dst_choice = input("Enter Destination Host name or IPv6 address (default 'Host B'): ").strip()
+        if not dst_choice:
+            dst_choice = "Host B"
+
+        dst_ip = dst_choice
+        dst_host_obj = topology.get_host(dst_choice)
+        if dst_host_obj:
+            dst_ip = dst_host_obj.ipv6_address
+
+        payload = input("Enter Payload data (default 'Hello IPv6'): ").strip()
+        if not payload:
+            payload = "Hello IPv6"
+
+        proto = input("Enter Next Header Protocol [UDP/TCP/ICMPv6] (default UDP): ").strip()
+        if not proto:
+            proto = "UDP"
+
+        hl_input = input("Enter Initial Hop Limit (default 64, or 1 to test drop): ").strip()
+        hl = int(hl_input) if hl_input else 64
+
+        # Create Packet
+        packet = create_ipv6_packet(
+            source_address=src_ip,
+            destination_address=dst_ip,
+            payload=payload,
+            next_header=proto,
+            hop_limit=hl,
+        )
+
+        print("\nStarting Forwarding Engine...\n")
+        result = forward_packet(
+            packet=packet,
+            topology=topology,
+            source_host_name=src_host_obj.name if src_host_obj else None,
+        )
+
+        # Display Comprehensive Report
+        print(result.format_report())
+        print()
+
+    except ValueError as err:
+        print(f"\n[Forwarding Error]: {err}\n")
+    except (KeyboardInterrupt, EOFError):
+        print("\nForwarding simulation cancelled.\n")
+
+
 def demonstrate_lpm():
     """Demonstrate Longest Prefix Match resolution using overlapping routes."""
     print("\n" + "=" * 65)
@@ -158,9 +228,9 @@ def demonstrate_lpm():
     demo_router.add_interface("eth2", "2001:db8:4:10::1/64")
 
     # Add overlapping static routes
-    demo_router.add_static_route("2001:db8::/32", next_hop="2001:db8:0::10", interface="eth0")
-    demo_router.add_static_route("2001:db8:4::/48", next_hop="2001:db8:4::10", interface="eth1")
-    demo_router.add_static_route("2001:db8:4:10::/64", next_hop="2001:db8:4:10::10", interface="eth2")
+    demo_router.add_static_route("2001:db8::/32", next_hop="2001:db8:10::1", interface="eth0")
+    demo_router.add_static_route("2001:db8:4::/48", next_hop="2001:db8:10::2", interface="eth1")
+    demo_router.add_static_route("2001:db8:4:10::/64", next_hop="2001:db8:10::3", interface="eth2")
 
     print("\nConfigured Routing Table on DemoRouter:")
     print(demo_router.routing_table.display_table())
@@ -180,7 +250,7 @@ def demonstrate_lpm():
 
 
 def run_sample_demonstration():
-    """Run a complete showcase of Phase 1, Phase 2, and Phase 3 features."""
+    """Run a complete showcase of Phase 1, Phase 2, Phase 3, and Phase 4 features."""
     topo = build_sample_topology()
 
     print("\n" + "=" * 65)
@@ -237,16 +307,6 @@ def run_sample_demonstration():
             "ICMPv6",
             255,
         ),
-        (
-            "Sample 4: No Next Header Packet",
-            "2001:db8::1",
-            "2001:db8::2",
-            "",
-            0,
-            0,
-            59,
-            64,
-        ),
     ]
 
     for label, src, dst, payload, tc, fl, proto, hl in packet_samples:
@@ -267,24 +327,44 @@ def run_sample_demonstration():
     print("       PHASE 3: ROUTERS, ROUTING TABLES & LPM SHOWCASE")
     print("=" * 65)
 
-    # 1. Topology display
+    # Topology display
     print(topo.display_topology())
     print()
 
-    # 2. Display R1 routing table
+    # Route lookup on R1 for Host B
     r1 = topo.get_router("R1")
     if r1:
         print(r1.display_router_info())
         print()
-
-        # 3. Route lookup on R1 for Host B
         print("[Route Lookup: R1 -> Host B (2001:db8:4::20)]")
         res = r1.lookup_route("2001:db8:4::20")
         print(r1.format_lookup_result(res))
         print("-" * 65)
 
-    # 4. Longest Prefix Match Showcase
-    demonstrate_lpm()
+    print("\n" + "=" * 65)
+    print("     PHASE 4: IPv6 PACKET FORWARDING ENGINE SHOWCASE")
+    print("=" * 65)
+
+    # 1. Successful Multi-Hop Delivery
+    print("\n[Forwarding Case 1: Host A -> Host B (Successful Delivery, Hop Limit = 64)]")
+    pkt1 = create_ipv6_packet("2001:db8:1::10", "2001:db8:4::20", payload="Hello IPv6 from Host A", hop_limit=64)
+    res1 = forward_packet(pkt1, topo, source_host_name="Host A")
+    print(res1.format_report())
+    print("-" * 65)
+
+    # 2. Hop Limit Expiration Drop
+    print("\n[Forwarding Case 2: Hop Limit Expiration Drop (Initial Hop Limit = 1)]")
+    pkt2 = create_ipv6_packet("2001:db8:1::10", "2001:db8:4::20", payload="Expiring Packet", hop_limit=1)
+    res2 = forward_packet(pkt2, topo, source_host_name="Host A")
+    print(res2.format_report())
+    print("-" * 65)
+
+    # 3. No Route Drop
+    print("\n[Forwarding Case 3: No Matching Route Drop (Destination: 2001:db8:99::10)]")
+    pkt3 = create_ipv6_packet("2001:db8:1::10", "2001:db8:99::10", payload="Unroutable Packet", hop_limit=64)
+    res3 = forward_packet(pkt3, topo, source_host_name="Host A")
+    print(res3.format_report())
+    print("-" * 65)
 
 
 def interactive_mode():
@@ -297,12 +377,13 @@ def interactive_mode():
         print("  1. Analyze an IPv6 Address or Subnet (Phase 1)")
         print("  2. Create & Simulate an IPv6 Packet (Phase 2)")
         print("  3. Simulated Routers & IPv6 Routing Tables (Phase 3)")
-        print("  4. Run Built-in Showcase Demonstrations (Phase 1, 2, & 3)")
-        print("  5. Exit")
+        print("  4. IPv6 Packet Forwarding Simulation (Phase 4)")
+        print("  5. Run Built-in Showcase Demonstrations (Phases 1 - 4)")
+        print("  6. Exit")
         print()
 
         try:
-            choice = input("Select an option (1-5): ").strip()
+            choice = input("Select an option (1-6): ").strip()
         except (KeyboardInterrupt, EOFError):
             print("\nExiting. Goodbye!")
             break
@@ -321,12 +402,14 @@ def interactive_mode():
         elif choice == "3":
             interactive_router_menu(topology)
         elif choice == "4":
+            interactive_forwarding_menu(topology)
+        elif choice == "5":
             run_sample_demonstration()
-        elif choice == "5" or choice.lower() in ("q", "quit", "exit"):
+        elif choice == "6" or choice.lower() in ("q", "quit", "exit"):
             print("\nExiting IPv6 Packet Processing Simulator. Goodbye!")
             break
         else:
-            print("\nInvalid choice. Please select 1, 2, 3, 4, or 5.\n")
+            print("\nInvalid choice. Please select 1, 2, 3, 4, 5, or 6.\n")
 
 
 def main():
@@ -341,13 +424,14 @@ def main():
             run_sample_demonstration()
         elif first_arg in ("--help", "-h", "help"):
             print("Usage:")
-            print("  python app.py                                   # Interactive menu mode")
-            print("  python app.py <ipv6_address>                    # Analyze address (Phase 1)")
-            print("  python app.py <ipv6_cidr>                       # Analyze subnet (Phase 1)")
-            print("  python app.py packet <src> <dst> [payload] [proto] [hop]")
-            print("  python app.py topology                          # Display network topology")
-            print("  python app.py route <router_name> <dest_ip>     # Perform route lookup on router")
-            print("  python app.py --demo                            # Run full showcase demo")
+            print("  python app.py                                              # Interactive menu mode")
+            print("  python app.py <ipv6_address>                               # Analyze address (Phase 1)")
+            print("  python app.py <ipv6_cidr>                                  # Analyze subnet (Phase 1)")
+            print("  python app.py packet <src> <dst> [payload] [proto] [hop]   # Simulate packet (Phase 2)")
+            print("  python app.py topology                                     # Display network topology (Phase 3)")
+            print("  python app.py route <router_name> <dest_ip>                # Route lookup (Phase 3)")
+            print("  python app.py forward <src_host_or_ip> <dst_host_or_ip> [payload] [hop_limit]")
+            print("  python app.py --demo                                       # Run full showcase demo")
         elif first_arg == "topology":
             print(topology.display_topology())
         elif first_arg == "route":
@@ -362,8 +446,38 @@ def main():
                 return
             result = router.lookup_route(dest_ip)
             print(router.format_lookup_result(result))
+        elif first_arg == "forward":
+            if len(sys.argv) < 4:
+                print("Usage: python app.py forward <src_host_or_ip> <dst_host_or_ip> [payload] [hop_limit]")
+                return
+            src_arg = sys.argv[2]
+            dst_arg = sys.argv[3]
+            payload = sys.argv[4] if len(sys.argv) > 4 else "Hello IPv6"
+            hl = int(sys.argv[5]) if len(sys.argv) > 5 else 64
+
+            # Resolve host names or direct IPs
+            src_host = topology.get_host(src_arg)
+            src_ip = src_host.ipv6_address if src_host else src_arg
+
+            dst_host = topology.get_host(dst_arg)
+            dst_ip = dst_host.ipv6_address if dst_host else dst_arg
+
+            try:
+                pkt = create_ipv6_packet(
+                    source_address=src_ip,
+                    destination_address=dst_ip,
+                    payload=payload,
+                    hop_limit=hl,
+                )
+                res = forward_packet(
+                    packet=pkt,
+                    topology=topology,
+                    source_host_name=src_host.name if src_host else None,
+                )
+                print(res.format_report())
+            except ValueError as err:
+                print(f"Forwarding execution error: {err}")
         elif first_arg == "packet":
-            # Direct packet creation mode via CLI
             if len(sys.argv) < 4:
                 print("Usage: python app.py packet <src_addr> <dst_addr> [payload] [next_header] [hop_limit]")
                 return

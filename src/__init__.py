@@ -4,6 +4,7 @@ IPv6 Packet Processing Simulator - Core Package.
 Phase 1: IPv6 Addressing & Project Foundation.
 Phase 2: IPv6 Packet & Header Simulation.
 Phase 3: Simulated Routers & IPv6 Routing Tables.
+Phase 4: IPv6 Packet Forwarding Simulation.
 """
 
 from src.ipv6_address import (
@@ -31,6 +32,13 @@ from src.network import (
     NetworkTopology,
     build_sample_topology,
 )
+from src.forwarding import (
+    ForwardingResult,
+    ForwardingStatus,
+    ForwardingStep,
+    PacketForwarder,
+    forward_packet,
+)
 
 __all__ = [
     "IPv6AddressAnalyzer",
@@ -48,4 +56,9 @@ __all__ = [
     "Link",
     "NetworkTopology",
     "build_sample_topology",
+    "ForwardingResult",
+    "ForwardingStatus",
+    "ForwardingStep",
+    "PacketForwarder",
+    "forward_packet",
 ]
