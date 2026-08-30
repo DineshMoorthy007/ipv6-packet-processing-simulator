@@ -19,7 +19,7 @@ from src.visualization import NetworkVisualizer
 
 
 # -----------------------------------------------------------------------------
-# Streamlit Page Configuration & Professional Styling
+# Streamlit Page Configuration & Modern Styling
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="IPv6 Packet Processing Simulator",
@@ -28,11 +28,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom CSS for Sleek Modern UI
+# Custom CSS for Sleek Modern UI with Clean Spacing & Typography
 st.markdown(
     """
     <style>
-    /* Global Typography & System Font Stack */
+    /* Global Typography */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
     html, body, [class*="css"] {
@@ -41,6 +41,34 @@ st.markdown(
 
     code, pre {
         font-family: 'JetBrains Mono', monospace !important;
+    }
+
+    /* Headings: Clean, Spacious, and Uncrowded */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.02em !important;
+        color: #f8fafc !important;
+    }
+
+    h2 {
+        font-size: 1.75rem !important;
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    h3, .stSubheader {
+        font-size: 1.25rem !important;
+        margin-top: 1.5rem !important;
+        margin-bottom: 0.75rem !important;
+        color: #e2e8f0 !important;
+    }
+
+    h4 {
+        font-size: 1.05rem !important;
+        margin-top: 1.25rem !important;
+        margin-bottom: 0.5rem !important;
+        color: #cbd5e1 !important;
     }
 
     /* Sidebar Clean Dark Palette */
@@ -93,7 +121,7 @@ st.markdown(
         transform: translateX(2px);
     }
 
-    /* Active / Selected Tab State with subtle left accent */
+    /* Active / Selected Tab State with clean background highlight */
     [data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"],
     [data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) {
         background-color: rgba(14, 165, 233, 0.12) !important;
@@ -108,7 +136,7 @@ st.markdown(
     div[data-testid="stMetric"] {
         background-color: #1e293b;
         border: 1px solid #334155;
-        padding: 14px 18px;
+        padding: 16px 20px;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -119,6 +147,7 @@ st.markdown(
         font-size: 0.82rem !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        margin-bottom: 4px !important;
     }
 
     div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
@@ -135,9 +164,9 @@ st.markdown(
         color: #10b981;
         border: 1px solid #10b981;
         border-radius: 6px;
-        font-weight: 700;
+        font-weight: 600;
         font-size: 0.95rem;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.3px;
     }
 
     .status-badge-dropped {
@@ -147,9 +176,9 @@ st.markdown(
         color: #ef4444;
         border: 1px solid #ef4444;
         border-radius: 6px;
-        font-weight: 700;
+        font-weight: 600;
         font-size: 0.95rem;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.3px;
     }
 
     .status-badge-info {
@@ -159,18 +188,8 @@ st.markdown(
         color: #60a5fa;
         border: 1px solid #3b82f6;
         border-radius: 6px;
-        font-weight: 600;
+        font-weight: 500;
         font-size: 0.85rem;
-    }
-
-    /* Header Accent */
-    .section-header {
-        border-left: 4px solid #0284c7;
-        padding-left: 12px;
-        margin-top: 1.2rem;
-        margin-bottom: 0.8rem;
-        color: #f1f5f9;
-        font-weight: 700;
     }
 
     /* Code Block Styling */
@@ -241,7 +260,7 @@ st.sidebar.markdown(
 # 1. Dashboard Page
 # =============================================================================
 if page == "Dashboard":
-    st.markdown("## IPv6 Packet Processing Simulator")
+    st.subheader("IPv6 Packet Processing Simulator")
     st.markdown(
         "A modular, deterministic simulation framework demonstrating IPv6 address parsing, "
         "40-byte fixed base headers, multi-interface routing, **Longest Prefix Match (LPM)**, "
@@ -254,9 +273,9 @@ if page == "Dashboard":
     with col1:
         st.markdown(
             """
-            <div style='background:#1e293b; padding:16px; border-radius:10px; border:1px solid #334155; height:100%;'>
-                <h4 style='color:#38bdf8; margin-top:0;'>1. IPv6 Addressing</h4>
-                <ul style='color:#cbd5e1; font-size:0.9rem; margin-bottom:0;'>
+            <div style='background:#1e293b; padding:18px; border-radius:10px; border:1px solid #334155; height:100%;'>
+                <h4 style='color:#38bdf8; margin-top:0; margin-bottom:12px;'>1. IPv6 Addressing</h4>
+                <ul style='color:#cbd5e1; font-size:0.9rem; margin-bottom:0; line-height:1.6;'>
                     <li>RFC 5952 Canonical Compression</li>
                     <li>Full 8-Group 128-Bit Expansion</li>
                     <li>Unicast, Link-Local & Multicast Scopes</li>
@@ -269,9 +288,9 @@ if page == "Dashboard":
     with col2:
         st.markdown(
             """
-            <div style='background:#1e293b; padding:16px; border-radius:10px; border:1px solid #334155; height:100%;'>
-                <h4 style='color:#38bdf8; margin-top:0;'>2. Packet Headers & Routing</h4>
-                <ul style='color:#cbd5e1; font-size:0.9rem; margin-bottom:0;'>
+            <div style='background:#1e293b; padding:18px; border-radius:10px; border:1px solid #334155; height:100%;'>
+                <h4 style='color:#38bdf8; margin-top:0; margin-bottom:12px;'>2. Packet Headers & Routing</h4>
+                <ul style='color:#cbd5e1; font-size:0.9rem; margin-bottom:0; line-height:1.6;'>
                     <li>Fixed 40-Byte Base Header Model</li>
                     <li>Traffic Class & Flow Label Control</li>
                     <li>Multi-Interface Router Entities</li>
@@ -284,9 +303,9 @@ if page == "Dashboard":
     with col3:
         st.markdown(
             """
-            <div style='background:#1e293b; padding:16px; border-radius:10px; border:1px solid #334155; height:100%;'>
-                <h4 style='color:#38bdf8; margin-top:0;'>3. Forwarding & Inspection</h4>
-                <ul style='color:#cbd5e1; font-size:0.9rem; margin-bottom:0;'>
+            <div style='background:#1e293b; padding:18px; border-radius:10px; border:1px solid #334155; height:100%;'>
+                <h4 style='color:#38bdf8; margin-top:0; margin-bottom:12px;'>3. Forwarding & Inspection</h4>
+                <ul style='color:#cbd5e1; font-size:0.9rem; margin-bottom:0; line-height:1.6;'>
                     <li>Hop Limit Validation & Decrements</li>
                     <li>Drop Reasons (Hop Limit / No Route)</li>
                     <li>Sequential Node Movement Snapshots</li>
@@ -297,15 +316,15 @@ if page == "Dashboard":
             unsafe_allow_html=True,
         )
 
-    st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 16px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 20px 0;'>", unsafe_allow_html=True)
 
-    st.markdown("<h3 class='section-header'>Simulated 3-Router Linear Network Architecture</h3>", unsafe_allow_html=True)
+    st.subheader("Simulated 3-Router Linear Network Architecture")
     st.code(
         NetworkVisualizer.format_topology_graph(topology),
         language="text",
     )
 
-    st.markdown("<h3 class='section-header'>End-to-End Simulation Workflow</h3>", unsafe_allow_html=True)
+    st.subheader("End-to-End Simulation Workflow")
     st.markdown(
         """
         ```text
@@ -320,7 +339,7 @@ if page == "Dashboard":
 # 2. IPv6 Address Analyzer Page
 # =============================================================================
 elif page == "IPv6 Address Analyzer":
-    st.markdown("## IPv6 Address Analyzer")
+    st.subheader("IPv6 Address Analyzer")
     st.markdown("Validate and analyze IPv6 addresses, CIDR prefix lengths, canonical formats, and subnet allocations.")
 
     col1, col2 = st.columns([3, 1])
@@ -352,11 +371,11 @@ elif page == "IPv6 Address Analyzer":
                 f"2^{128 - result.prefix_length}" if result.prefix_length is not None else "1 host",
             )
 
-            st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 16px 0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 20px 0;'>", unsafe_allow_html=True)
 
             col_a, col_b = st.columns(2)
             with col_a:
-                st.markdown("<h4 class='section-header'>Representation Formats</h4>", unsafe_allow_html=True)
+                st.subheader("Representation Formats")
                 st.markdown("**RFC 5952 Compressed Canonical:**")
                 st.code(result.compressed or "N/A", language="text")
 
@@ -370,7 +389,7 @@ elif page == "IPv6 Address Analyzer":
                 st.code(result.binary_representation or "N/A", language="text")
 
             with col_b:
-                st.markdown("<h4 class='section-header'>Network & Subnet Breakdown</h4>", unsafe_allow_html=True)
+                st.subheader("Network & Subnet Breakdown")
                 if result.has_prefix:
                     st.markdown(f"**Network Address:** `{result.network_address}`")
                     st.markdown(f"**Netmask:** `{result.netmask}`")
@@ -391,7 +410,7 @@ elif page == "IPv6 Address Analyzer":
 # 3. IPv6 Packet Simulator Page
 # =============================================================================
 elif page == "IPv6 Packet Simulator":
-    st.markdown("## IPv6 Packet & Base Header Simulator")
+    st.subheader("IPv6 Packet & Base Header Simulator")
     st.markdown("Construct simulated IPv6 packets with fixed 40-byte base headers and dynamic payload sizing.")
 
     col1, col2 = st.columns(2)
@@ -441,11 +460,11 @@ elif page == "IPv6 Packet Simulator":
             p3.metric("Payload Length", f"{pkt.payload_length} Bytes")
             p4.metric("Total Packet Size", f"{40 + pkt.payload_length} Bytes")
 
-            st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 16px 0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 20px 0;'>", unsafe_allow_html=True)
 
             col_h1, col_h2 = st.columns(2)
             with col_h1:
-                st.markdown("<h4 class='section-header'>40-Byte Base Header Breakdown</h4>", unsafe_allow_html=True)
+                st.subheader("40-Byte Base Header Breakdown")
                 header_data = [
                     {"Header Field": "Version", "Size / Bits": "4 bits", "Value": str(pkt.version)},
                     {"Header Field": "Traffic Class", "Size / Bits": "8 bits", "Value": str(pkt.traffic_class)},
@@ -459,10 +478,10 @@ elif page == "IPv6 Packet Simulator":
                 st.dataframe(header_data, use_container_width=True, hide_index=True)
 
             with col_h2:
-                st.markdown("<h4 class='section-header'>Payload Content Inspection</h4>", unsafe_allow_html=True)
+                st.subheader("Payload Content Inspection")
                 st.code(pkt.payload if pkt.payload else "<Empty Payload>", language="text")
 
-                st.markdown("<h4 class='section-header'>Structured Terminal Header</h4>", unsafe_allow_html=True)
+                st.subheader("Structured Terminal Header")
                 st.code(NetworkVisualizer.format_header_view(pkt), language="text")
 
         except ValueError as err:
@@ -473,24 +492,24 @@ elif page == "IPv6 Packet Simulator":
 # 4. Network Topology Page
 # =============================================================================
 elif page == "Network Topology":
-    st.markdown("## Network Topology & Device Inspector")
+    st.subheader("Network Topology & Device Inspector")
     st.markdown("Explore the simulated 3-router linear network, configured interfaces, and subnet links.")
 
-    st.markdown("<h4 class='section-header'>Topology Architecture Diagram</h4>", unsafe_allow_html=True)
+    st.subheader("Topology Architecture Diagram")
     st.code(NetworkVisualizer.format_topology_graph(topology), language="text")
 
-    st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 16px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 20px 0;'>", unsafe_allow_html=True)
 
-    st.markdown("<h4 class='section-header'>Inspect Device Specification Card</h4>", unsafe_allow_html=True)
+    st.subheader("Inspect Device Specification Card")
     all_devs = list(topology.hosts.keys()) + list(topology.routers.keys())
     selected_dev = st.selectbox("Select Device to Inspect:", all_devs, index=0)
 
     if selected_dev:
         st.code(NetworkVisualizer.format_device_details(selected_dev, topology), language="text")
 
-    st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 16px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 20px 0;'>", unsafe_allow_html=True)
 
-    st.markdown("<h4 class='section-header'>Configured Subnet Links</h4>", unsafe_allow_html=True)
+    st.subheader("Configured Subnet Links")
     links_data = []
     for link in topology.links:
         links_data.append({
@@ -505,7 +524,7 @@ elif page == "Network Topology":
 # 5. Routing Tables & LPM Page
 # =============================================================================
 elif page == "Routing Tables & LPM":
-    st.markdown("## Router Routing Tables & Longest Prefix Match (LPM)")
+    st.subheader("Router Routing Tables & Longest Prefix Match (LPM)")
     st.markdown("Inspect router interfaces, active routing tables, and test Longest Prefix Match (LPM) route lookups.")
 
     selected_router_name = st.selectbox("Select Router:", list(topology.routers.keys()), index=0)
@@ -515,7 +534,7 @@ elif page == "Routing Tables & LPM":
         col_r1, col_r2 = st.columns([1, 1])
 
         with col_r1:
-            st.markdown(f"<h4 class='section-header'>Interfaces on {router.name}</h4>", unsafe_allow_html=True)
+            st.subheader(f"Interfaces on {router.name}")
             intf_data = []
             for intf in router.interfaces.values():
                 intf_data.append({
@@ -527,13 +546,13 @@ elif page == "Routing Tables & LPM":
             st.dataframe(intf_data, use_container_width=True, hide_index=True)
 
         with col_r2:
-            st.markdown(f"<h4 class='section-header'>Active Routing Table ({router.name})</h4>", unsafe_allow_html=True)
+            st.subheader(f"Active Routing Table ({router.name})")
             routes_data = router.routing_table.to_list()
             st.dataframe(routes_data, use_container_width=True, hide_index=True)
 
-        st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 16px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 20px 0;'>", unsafe_allow_html=True)
 
-        st.markdown("<h4 class='section-header'>Route Lookup & Longest Prefix Match Query</h4>", unsafe_allow_html=True)
+        st.subheader("Route Lookup & Longest Prefix Match Query")
         query_dest = st.text_input(
             f"Enter Destination IPv6 to Lookup on {router.name}:",
             value="2001:db8:4::20",
@@ -565,7 +584,7 @@ elif page == "Routing Tables & LPM":
 # 6. Packet Forwarding Simulation Page
 # =============================================================================
 elif page == "Packet Forwarding Engine":
-    st.markdown("## Packet Forwarding Simulation Cockpit")
+    st.subheader("Packet Forwarding Simulation Cockpit")
     st.markdown("Simulate end-to-end hop-by-hop packet transit across routers `R1 -> R2 -> R3` with real-time Hop Limit updates.")
 
     col1, col2 = st.columns(2)
@@ -591,7 +610,7 @@ elif page == "Packet Forwarding Engine":
 
         st.markdown(
             """
-            <div style='background:#1e293b; padding:12px; border-radius:8px; border:1px solid #334155; font-size:0.86rem; color:#cbd5e1;'>
+            <div style='background:#1e293b; padding:14px; border-radius:8px; border:1px solid #334155; font-size:0.86rem; color:#cbd5e1; line-height:1.6;'>
                 <strong>Forwarding Protocol Mechanics:</strong><br>
                 &bull; Each router decrements Hop Limit (HL = HL - 1).<br>
                 &bull; Dropped if HL &le; 1 upon arrival at intermediate router.<br>
@@ -625,7 +644,7 @@ elif page == "Packet Forwarding Engine":
                 sim_pkt = st.session_state["last_forwarding_packet"]
                 sim_res = st.session_state["last_forwarding_result"]
 
-            st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 16px 0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='border: none; border-top: 1px solid #334155; margin: 20px 0;'>", unsafe_allow_html=True)
 
             # Result Header Badge
             if sim_res.status == ForwardingStatus.DELIVERED:
@@ -669,22 +688,22 @@ elif page == "Packet Forwarding Engine":
             ])
 
             with tab1:
-                st.markdown("<h4 class='section-header'>Network Architecture with Active Path Highlight</h4>", unsafe_allow_html=True)
+                st.subheader("Network Architecture with Active Path Highlight")
                 st.code(NetworkVisualizer.format_topology_graph(topology, active_path=sim_res.path), language="text")
 
             with tab2:
-                st.markdown("<h4 class='section-header'>Packet Processing Event Timeline</h4>", unsafe_allow_html=True)
+                st.subheader("Packet Processing Event Timeline")
                 st.code(NetworkVisualizer.format_forwarding_timeline(sim_res), language="text")
 
             with tab3:
-                st.markdown("<h4 class='section-header'>Step-by-Step Packet Movement Snapshots</h4>", unsafe_allow_html=True)
+                st.subheader("Step-by-Step Packet Movement Snapshots")
                 snapshots = NetworkVisualizer.format_packet_movement_steps(sim_res)
                 for snap in snapshots:
                     st.text(snap)
                     st.markdown("---")
 
             with tab4:
-                st.markdown("<h4 class='section-header'>Packet Header Integrity Inspection</h4>", unsafe_allow_html=True)
+                st.subheader("Packet Header Integrity Inspection")
                 st.markdown(
                     "Observe that **only Hop Limit** is mutated during router forwarding. "
                     "All other fields remain intact."
@@ -705,7 +724,7 @@ elif page == "Packet Forwarding Engine":
 # 7. Test Scenarios Page
 # =============================================================================
 elif page == "Test Scenarios":
-    st.markdown("## Standardized Laboratory Test Scenarios")
+    st.subheader("Standardized Laboratory Test Scenarios")
     st.markdown("Execute pre-configured test scenarios to demonstrate fundamental IPv6 networking concepts.")
 
     scenario_options = [
@@ -721,7 +740,7 @@ elif page == "Test Scenarios":
 
     if st.button("Execute Selected Scenario", type="primary"):
         if "Scenario 1" in chosen_sc:
-            st.markdown("<h4 class='section-header'>Scenario 1: Successful Multi-Hop Delivery</h4>", unsafe_allow_html=True)
+            st.subheader("Scenario 1: Successful Multi-Hop Delivery")
             pkt = create_ipv6_packet("2001:db8:1::10", "2001:db8:4::20", payload="Scenario 1 Test", hop_limit=64)
             res = forward_packet(pkt, topology, source_host_name="Host A")
             st.markdown("<div class='status-badge-delivered'>DELIVERED: Host A -> R1 -> R2 -> R3 -> Host B</div>", unsafe_allow_html=True)
@@ -729,7 +748,7 @@ elif page == "Test Scenarios":
             st.code(NetworkVisualizer.format_forwarding_timeline(res), language="text")
 
         elif "Scenario 2" in chosen_sc:
-            st.markdown("<h4 class='section-header'>Scenario 2: Hop Limit Expiration Packet Drop</h4>", unsafe_allow_html=True)
+            st.subheader("Scenario 2: Hop Limit Expiration Packet Drop")
             pkt = create_ipv6_packet("2001:db8:1::10", "2001:db8:4::20", payload="Scenario 2 Test", hop_limit=1)
             res = forward_packet(pkt, topology, source_host_name="Host A")
             st.markdown("<div class='status-badge-dropped'>DROPPED_HOP_LIMIT: Dropped at R1 (Hop Limit = 1 <= 1)</div>", unsafe_allow_html=True)
@@ -737,7 +756,7 @@ elif page == "Test Scenarios":
             st.code(NetworkVisualizer.format_forwarding_timeline(res), language="text")
 
         elif "Scenario 3" in chosen_sc:
-            st.markdown("<h4 class='section-header'>Scenario 3: No Route to Destination Drop</h4>", unsafe_allow_html=True)
+            st.subheader("Scenario 3: No Route to Destination Drop")
             pkt = create_ipv6_packet("2001:db8:1::10", "2001:db8:99::10", payload="Scenario 3 Test", hop_limit=64)
             res = forward_packet(pkt, topology, source_host_name="Host A")
             st.markdown("<div class='status-badge-dropped'>DROPPED_NO_ROUTE: Dropped at R1 (No matching route for 2001:db8:99::10)</div>", unsafe_allow_html=True)
@@ -745,7 +764,7 @@ elif page == "Test Scenarios":
             st.code(NetworkVisualizer.format_forwarding_timeline(res), language="text")
 
         elif "Scenario 4" in chosen_sc:
-            st.markdown("<h4 class='section-header'>Scenario 4: Longest Prefix Match (LPM) Demonstration</h4>", unsafe_allow_html=True)
+            st.subheader("Scenario 4: Longest Prefix Match (LPM) Demonstration")
             demo_router = Router("DemoRouter")
             demo_router.add_interface("eth0", "2001:db8:0::1/32")
             demo_router.add_interface("eth1", "2001:db8:4::1/48")
@@ -763,7 +782,7 @@ elif page == "Test Scenarios":
             st.code(demo_router.format_lookup_result(lookup), language="text")
 
         elif "Scenario 5" in chosen_sc:
-            st.markdown("<h4 class='section-header'>Scenario 5: Directly Connected Subnet Delivery</h4>", unsafe_allow_html=True)
+            st.subheader("Scenario 5: Directly Connected Subnet Delivery")
             pkt = create_ipv6_packet("2001:db8:1::10", "2001:db8:1::25", payload="Scenario 5 Test", hop_limit=64)
             res = forward_packet(pkt, topology, source_host_name="Host A")
             st.markdown("<div class='status-badge-delivered'>DIRECT DELIVERY: Delivered on local 2001:db8:1::/64 (0 router hops)</div>", unsafe_allow_html=True)
@@ -771,7 +790,7 @@ elif page == "Test Scenarios":
             st.code(NetworkVisualizer.format_forwarding_timeline(res), language="text")
 
         elif "Run All" in chosen_sc:
-            st.markdown("<h4 class='section-header'>Batch Results for Standard Scenarios</h4>", unsafe_allow_html=True)
+            st.subheader("Batch Results for Standard Scenarios")
             batch_results = []
             scenarios = [
                 ("Scenario 1: Multi-Hop Delivery", "2001:db8:1::10", "2001:db8:4::20", 64),
